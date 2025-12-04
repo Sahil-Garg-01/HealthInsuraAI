@@ -1,0 +1,21 @@
+# Health Insurance Claim Processing System
+
+# Core
+python-dotenv>=1.0.0
+
+# LangChain & LangGraph
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.20
+
+# HTTP Client
+requests>=2.31.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Web Framework (optional - for API)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+# python-multipart>=0.0.6
