@@ -6,7 +6,7 @@ Makes approval/reject/query decisions based on claim data using LLM reasoning.
 
 import logging
 from typing import Dict, Any
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
 from config.settings import settings
 
@@ -60,7 +60,7 @@ def make_decision(claim_json: Dict[str, Any]) -> Dict[str, str]:
     Returns:
         Dict with decision and reasons.
     """
-    llm = ChatOpenAI(
+    llm = ChatGoogleGenerativeAI(
         model=settings.llm.model,
         temperature=settings.llm.temperature,
         api_key=settings.llm.api_key

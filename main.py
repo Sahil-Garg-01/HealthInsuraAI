@@ -1,10 +1,14 @@
 """
 Health Insurance Claim Processing System.
 
-Entry point for running the claim processing agent.
+API endpoint for processing claim files.
 """
 
 import logging
+import os
+import tempfile
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,23 +19,31 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+app = FastAPI(title="Health Insurance Claim Processor")
 
-def main():
-    """Run the claim processing system."""
+
+@app.post("/process-claim")
+async def process_claim(files: list[UploadFile] = File(...)):
+    """Process uploaded claim files and return decision."""
     from src.agent.react_agent import run_agent
     
-    logger.info("Health Insurance Claim System Starting...")
+    # Save uploaded files temporarily
+    temp_files = []
+    for file in files:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            temp_file.write(await file.read())
+            temp_files.append(temp_file.name)
     
-    # Example: Process sample claim files
-    sample_files = ["sample_claim.pdf", "sample_bill.pdf"]
-    
-    result = run_agent(sample_files)
-    
-    logger.info("Processing complete")
-    print(f"\nDecision: {result['decision']}")
-    print(f"Iterations: {result['iterations']}")
-    print(f"\nFinal Response:\n{result['final_response']}")
+    try:
+        # Run the agent
+        result = run_agent(temp_files)
+        return JSONResponse(content=result)
+    finally:
+        # Clean up temp files
+        for temp_file in temp_files:
+            os.unlink(temp_file)
 
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

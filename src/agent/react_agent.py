@@ -9,7 +9,7 @@ import logging
 from typing import TypedDict, Literal, Annotated
 from operator import add
 
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 
@@ -125,7 +125,7 @@ def think_node(state: AgentState) -> AgentState:
     """
     THINK: Agent reasons about current state and decides next action.
     """
-    llm = ChatOpenAI(
+    llm = ChatGoogleGenerativeAI(
         model=settings.llm.model,
         temperature=settings.llm.temperature,
         api_key=settings.llm.api_key

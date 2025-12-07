@@ -29,9 +29,9 @@ class APIEndpoints:
 @dataclass(frozen=True)
 class LLMSettings:
     """LLM configuration."""
-    model: str = os.getenv("LLM_MODEL", "gpt-4")
-    temperature: float = float(os.getenv("LLM_TEMPERATURE", "0"))
-    api_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
+    model: str = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
+    temperature: float = float(os.getenv("LLM_TEMPERATURE", "0.0"))
+    api_key: str = field(default_factory=lambda: os.getenv("GOOGLE_API_KEY", ""))
 
 
 @dataclass(frozen=True)
