@@ -33,6 +33,7 @@ class AgentState(TypedDict):
     iteration: int                          # Loop counter
     is_complete: bool                       # Termination flag
     final_result: dict                      # Final output
+    claim_decision: dict                    # Store claim decision details
 
 
 # =============================================================================
@@ -100,6 +101,7 @@ def execute_action(action: str, action_input: dict, state: AgentState) -> str:
         from src.processors.decision import make_decision
         claim_json = action_input.get("claim_json", {})
         result = make_decision(claim_json)
+        state["claim_decision"] = result  # Store decision in state
         return f"Decision: {result['decision']}. Reasons: {result['reasons'][:100]}..."
     
     elif action == "output":
@@ -161,7 +163,7 @@ def think_node(state: AgentState) -> AgentState:
         state["action"] = parsed.get("action", "finish")
         state["action_input"] = parsed.get("action_input", {})
         
-        logger.info(f"THINK: {state['thought'][:100]}...")
+        logger.info(f"THINK: {state['thought'][:200]}...")
         
     except json.JSONDecodeError:
         logger.warning(f"Failed to parse LLM response: {response.content}")
@@ -184,7 +186,7 @@ def act_node(state: AgentState) -> AgentState:
         first_msg = state["messages"][0] if state["messages"] else {}
         action_input["files"] = first_msg.get("files", [])
     
-    logger.info(f"ACT: {action} with input {action_input}")
+    logger.info(f"ACT: {action} with {len(action_input.get('files', []))} files")
     
     observation = execute_action(action, action_input, state)
     state["observation"] = observation
@@ -276,7 +278,8 @@ def run_agent(uploaded_files: list[str]) -> dict:
         "observation": "",
         "iteration": 0,
         "is_complete": False,
-        "final_result": {}
+        "final_result": {},
+        "claim_decision": {}
     }
     
     logger.info(f"Starting ReAct agent for {len(uploaded_files)} files")
@@ -284,8 +287,7 @@ def run_agent(uploaded_files: list[str]) -> dict:
     result = agent.invoke(initial_state)
     
     return {
-        "decision": result.get("current_step", "unknown"),
-        "final_response": result.get("observation", ""),
-        "iterations": result.get("iteration", 0),
-        "result": result.get("final_result", {})
+        "claim_decision": result.get("claim_decision", {}),
+        "status": "completed" if result.get("is_complete") else "incomplete",
+        "iterations": result.get("iteration", 0)
     }
